@@ -1,11 +1,8 @@
-import express from "express";
-// import Comment_model from "../model/comments.js";
-// import Post_model from "../model/posts.js"
+import express from "express"
 import User_model from "../model/users.js";
+import Book_model from "../model/books.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
-// import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -14,7 +11,7 @@ const router = express.Router();
 // auth create  user
 
 
-router.post("/users/createUser", async (req, res) => {
+router.post("/createUser", async (req, res) => {
   const { name, email, mobile, password, confirmPassword} = req.body;
  if (password !== confirmPassword) {
     return res.status(400).json({ message: "password not match" });
@@ -60,7 +57,7 @@ router.post("/users/createUser", async (req, res) => {
 
 // auth login user
 
-router.post("/users/loginUser", async (req, res, next) => {
+router.post("/loginUser", async (req, res, next) => {
   const { email, password } = req.body;
   // check if email and password is provided
   if (!email || !password) {
@@ -96,12 +93,20 @@ router.post("/users/loginUser", async (req, res, next) => {
   }
 });
 
-// auth create  Blog post
+// auth logout user
 
-router.post("/blogs/createPost", async (req, res) => {
-  const { author, titles, description,  posts } = req.body;
+router.get("/logoutUser", (req, res) => {
+
+    res.cookie("jwt", "", { maxAge: 1 });
+    res.status(200).json({ message: "Logout successful" });
+});
+
+// auth create Book
+
+router.post("/createBook", async (req, res) => {
+  const { author, titles, image, name,  pages, price} = req.body;
     try {
-      const post = await Post_model.create({ author, titles, description,  posts });
+      const post = await Book_model.create({ author, titles, image, name,  pages, price});
       res.status(201).json({ post });
     }
     catch (err) {
@@ -110,149 +115,69 @@ router.post("/blogs/createPost", async (req, res) => {
 });
 
 
-// get all Blog post
+// get all Book
 
-router.get("/blogs/getAllPost", async (req, res) => {
+router.get("/getAllBook", async (req, res) => {
   try {
-    const posts = await Post_model.find();
-    res.status(200).json({posts });
+    const books = await Book_model.find();
+    res.status(200).json({books});
   }
   catch (err) {
     res.status(404).json({ message: err.message });
   }
 });
 
-// get single Blog post
+// get single Book
 
-router.get("/blogs/getSinglePost/:id", async (req, res) => {
+router.get("/getSingleBook/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    await Post_model.findById(id).then((post) => {
-      res.status(201).json({ message: "post successfully listed", post });
+    await Post_model.findById(id).then((book) => {
+      res.status(201).json({ message: "book successfully listed", book });
     });
   } catch (err) {
     res.status(400).json({
-      message: "post not successfully listed",
+      message: "book not successfully listed",
       error: err.message,
     });
   }
 });
 
-// update Blog post
+// update  Update book
 
-router.put("/blogs/updatePost/:id", async (req, res) => {
+
+router.put("/updateBook/:id", async (req, res) => {
   const { id } = req.params;
-  const { author, titles, description, post } = req.body;
+  const { author, titles, image, name,  pages, price } = req.body;
   try {
-     await  Post_model.findByIdAndUpdate(id, { author, titles, description, post }).then((post) => {
-      res.status(201).json({ message: "post successfully updated", post });
+     await  Book_model.findByIdAndUpdate(id, {  author, titles, image, name,  pages, price }).then((book) => {
+      res.status(201).json({ message: "book successfully updated", book });
     });
   } catch (err) {
     res.status(400).json({
-      message: "post not successfully updated",
+      message: "book not successfully updated",
       error: err.message,
     });
   }
 });
 
-// delete Blog post
+// delete Book
 
-router.delete("/blogs/deletePost/:id", async (req, res) => {
+router.delete("/deleteBook/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    await Post_model.findByIdAndDelete(id).then((post) => {
-      res.status(201).json({ message: "post successfully deleted", post });
+    await Book_model.findByIdAndDelete(id).then((book) => {
+      res.status(201).json({ message: "book successfully deleted", book });
     });
   } catch (err) {
     res.status(400).json({
-      message: "post not successfully deleted",
+      message: "book not successfully deleted",
       error: err.message,
     });
   }
 });
 
-  
-
-
-// auth create comment post
-
-router.post("/blogs/createComment", async (req, res) => {
-  const { name, upvotes, comments } = req.body;
-    try {
-      const comment = await Comment_model.create({ name, upvotes, comments });
-      res.status(201).json({ comment });
-    }
-    catch (err) {
-      res.status(400).json({ message: err.message });
-    }
-});
-
-
-// get all comments post
-
-router.get("/blogs/getAllComment", async (req, res) => {
-  try {
-    const comments = await Comment_model.find();
-    res.status(200).json({comments });
-  }
-  catch (err) {
-    res.status(404).json({ message: err.message });
-  }
-});
-
-
-// get single comment post
-
-router.get("/blogs/getSingleComment/:id", async (req, res) => {
-  const { id } = req.params;
-  try {
-    await Comment_model.findById(id).then((comments) => {
-      res.status(201).json({ message: "comment successfully listed", comments });
-    });
-  } catch (err) {
-    res.status(400).json({
-      message: "comment not successfully listed",
-      error: err.message,
-    });
-  }
-});
-
-// update comment post
-
-router.put("/blogs/updateComment/:id", async (req, res) => {
-  const { id } = req.params;
-  const { name, upvotes, comments } = req.body;
-  try {
-    await Comment_model.findByIdAndUpdate(id, { name, upvotes, comments }).then(
-      (comments) => {
-        res.status(201).json({ message: "comment successfully updated", comments });
-      }
-    );
-  } catch (err) {
-    res.status(400).json({
-      message: "comment not successfully updated",
-      error: err.message,
-    });
-  }
-});
-
-
-// delete comment post
-
-router.delete("/blogs/deleteComment/:id", async (req, res) => {
-  const { id } = req.params;
-  try {
-    await Comment_model.findByIdAndDelete(id).then((comments) => {
-      res.status(201).json({ message: "comment successfully deleted", comments });
-    });
-  } catch (err) {
-    res.status(400).json({
-      message: "comment not successfully deleted",
-      error: err.message,
-    });
-  }
-});
 
 
 
