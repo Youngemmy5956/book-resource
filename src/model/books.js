@@ -6,6 +6,7 @@ const bookSchema = mongoose.Schema({
     pages:{ type: Number, required: true },
     price:{ type: Number, required: true },
     author:{ type: String, required: true },
+    Date: { type: Date, default: Date.now },
 
 
 });
