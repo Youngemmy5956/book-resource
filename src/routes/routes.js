@@ -118,7 +118,7 @@ router.post("/createBook", async (req, res) => {
 router.get("/getAllBook", async (req, res) => {
   try {
     const books = await Book_model.find();
-    res.status(200).json({ books });
+    res.status(200).json({ message: "book successfully listed", books });
   } catch (err) {
     res.status(404).json({ message: err.message });
   }
@@ -130,7 +130,7 @@ router.get("/getSingleBook/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    await Post_model.findById(id).then((book) => {
+    await Book_model.findById(id).then((book) => {
       res.status(201).json({ message: "book successfully listed", book });
     });
   } catch (err) {
